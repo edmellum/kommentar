@@ -1,0 +1,5 @@
+2014/09/14-23:01:02.250 3abc Recovering log #42
+2014/09/14-23:01:02.250 3abc Level-0 table #44: started
+2014/09/14-23:01:02.253 3abc Level-0 table #44: 636 bytes OK
+2014/09/14-23:01:02.258 3abc Delete type=0 #42
+2014/09/14-23:01:02.258 3abc Delete type=3 #40
