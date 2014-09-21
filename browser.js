@@ -16,25 +16,37 @@ var auth = {
     user: {
         id: 'olanordmann',
         name: 'Ola Nordmann',
+	// Might need to encrypt all this stuff as the page might not
+	// always be over SSL.
         email: 'ola.nordmann@norge.no',
-        avatar: '//gravatar.com/avatar/767fc9c115a1b989744c755db47feb60',
+        avatar: '//gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=32',
         admin: true
     }
 };
 // Should be an HMAC appended with timestamp to avoid replays.
 var signature = hash('secretgoeshere' + JSON.stringify(auth));
+var authHeader = signature + ' ' + new Buffer(JSON.stringify(auth)).toString('base64');
 
 var posts = request
         .get('/threads/'+ thread +'/posts')
+        .set('Authorization', authHeader)
         .end(function(res) {
-            var data = res.body.map(function(item) {
-                return item.doc;
+	    var users = {};
+
+            var posts = res.body.map(function(item) {
+                if(item.doc.type === 'post') return item.doc;
+            }).filter(function(x) { return x != null; });
+
+            res.body.forEach(function(item) {
+                if(item.doc.type === 'user') users[item.doc._id] = item.doc;
             });
-            
+
             var kommentar = Kommentar({
-                posts: data,
+                posts: posts,
+		users: users,
                 thread: thread,
-                auth: signature + ' ' + new Buffer(JSON.stringify(auth)).toString('base64')
+		currentUser: auth.user,
+                auth: authHeader
             });
 
             React.renderComponent(kommentar, el);
